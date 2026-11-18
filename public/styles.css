@@ -1,0 +1,41 @@
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#0b1220;color:#e2e8f0}
+header{padding:28px 20px;background:#111c33;border-bottom:3px solid #dc2626}
+h1{margin:0;font-size:32px}
+.sub{color:#94a3b8;margin-top:6px}
+.levels{margin-top:12px}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800}
+.b{background:#14532d;color:#fff}
+.m{background:#1e40af;color:#fff}
+.p{background:#6d28d9;color:#fff}
+.e{background:#92400e;color:#fff}
+nav{display:flex;gap:8px;flex-wrap:wrap;padding:14px 20px;background:#0f172a;position:sticky;top:0;z-index:10}
+nav button{cursor:pointer;border:0;border-radius:999px;padding:10px 16px;font-weight:700;background:#1e293b;color:#e2e8f0}
+nav button.active{background:#dc2626;color:#fff}
+nav button:focus-visible{outline:2px solid #f87171;outline-offset:2px}
+main{max-width:1000px;margin:0 auto;padding:20px}
+.card{background:#13203a;border:1px solid #243656;border-radius:16px;padding:18px;margin:14px 0}
+.card.inner{background:#0f1a30}
+.card h2{margin:0 0 8px}
+.card h3{margin:0 0 6px}
+.small{color:#94a3b8;font-size:13px;line-height:1.5}
+.ok{color:#4ade80;font-weight:700}
+input[type=text],input[type=number],textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;margin:6px 0;font:inherit}
+label{display:block;margin:8px 0;font-weight:600}
+button{cursor:pointer;border:0;border-radius:10px;padding:10px 16px;font-weight:700;background:#dc2626;color:#fff;margin:6px 4px 6px 0}
+button:focus-visible,a:focus-visible{outline:2px solid #f87171;outline-offset:2px}
+details{background:#0f172a;border:1px solid #243656;border-radius:12px;padding:12px;margin:8px 0}
+summary{cursor:pointer;font-weight:700}
+.axistag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#1e293b;color:#93c5fd;margin-left:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.fixrow{display:flex;gap:8px;flex-wrap:wrap}
+.fixrow button{background:#1e293b}
+.btnlink{display:inline-block;background:#1e40af;color:#fff;border-radius:10px;padding:10px 16px;font-weight:700;text-decoration:none;margin:6px 4px 6px 0}
+.progrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.prog{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.prog label,.progrow label{margin:0}
+.prog select,.progrow select{width:auto}
+.prog input[type=number],.progrow input[type=number]{width:90px}
+.prog textarea,.progrow textarea{flex:1 1 220px;min-width:200px}
+footer{max-width:1000px;margin:0 auto;padding:0 20px 28px}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}h1{font-size:26px}}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Hacker Studio</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>AI HACKER STUDIO</h1>
+  <div class="sub">Become an AI Hacker by 2027 — Authorized Labs Only: PortSwigger Academy + Lakera Gandalf. Never attack production systems or any system without explicit written authorization.</div>
+  <div class="levels" aria-label="Level path">
+    <span class="badge b">BEGINNER</span>
+    <span class="badge m">MASTER</span>
+    <span class="badge p">PRO</span>
+    <span class="badge e">EXECUTIVE</span>
+  </div>
+</header>
+
+<nav role="tablist" aria-label="Studio sections">
+  <button role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" class="active">Overview</button>
+  <button role="tab" id="tab-playbook" aria-controls="panel-playbook" aria-selected="false" tabindex="-1">Prompt Playbook</button>
+  <button role="tab" id="tab-lakera" aria-controls="panel-lakera" aria-selected="false" tabindex="-1">Lakera Playbook</button>
+  <button role="tab" id="tab-tech" aria-controls="panel-tech" aria-selected="false" tabindex="-1">Technique Library</button>
+  <button role="tab" id="tab-decide" aria-controls="panel-decide" aria-selected="false" tabindex="-1">Decision Studio</button>
+  <button role="tab" id="tab-journal" aria-controls="panel-journal" aria-selected="false" tabindex="-1">Prompt Journal</button>
+  <button role="tab" id="tab-report" aria-controls="panel-report" aria-selected="false" tabindex="-1">Report Builder</button>
+</nav>
+
+<main>
+  <section role="tabpanel" id="panel-overview" aria-labelledby="tab-overview">
+    <div class="card">
+      <h2>Current Mission</h2>
+      <p id="mission">Loading…</p>
+      <p class="small" id="levelLine"></p>
+    </div>
+    <div class="card">
+      <h2>Six-Step Kill Chain</h2>
+      <div id="killchain"></div>
+    </div>
+    <div class="card">
+      <h2>30-Day Plan</h2>
+      <p class="small">Track each block as you work through it. Status is saved on this server.</p>
+      <div id="planList"></div>
+    </div>
+    <div class="card">
+      <h2>OWASP LLM Top 10 (2025)</h2>
+      <div id="owasp"></div>
+      <p class="small"><b>LLM01 + LLM06 is the killer combo:</b> prompt injection gets in, excessive agency amplifies it.</p>
+    </div>
+    <div class="card">
+      <h2>Defense Checklist</h2>
+      <div id="defenseList"></div>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="panel-playbook" aria-labelledby="tab-playbook" hidden>
+    <div class="card">
+      <h2>PortSwigger Web LLM Attacks — 7 Labs</h2>
+      <p class="small">Source: PortSwigger Web Security Academy (free). Labs use a live LLM in a sanctioned academy instance. <span id="labProg" class="ok"></span></p>
+      <div id="labList"></div>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="panel-lakera" aria-labelledby="tab-lakera" hidden>
+    <div class="card">
+      <h2>Lakera Gandalf — Agent Breaker, 10 Apps</h2>
+      <p class="small">Score 0–100 per app; 75+ passes. Success means achieving the attack objective, not just getting a rude answer. <span id="lakProg" class="ok"></span></p>
+      <div id="lakList"></div>
+    </div>
+    <div class="card">
+      <h2>Phase 2 Playbook</h2>
+      <ol id="phase2"></ol>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="panel-tech" aria-labelledby="tab-tech" hidden>
+    <div class="card">
+      <h2>Technique Library — 24</h2>
+      <p class="small">Arcanum Prompt Injection Taxonomy v1.5+: 27 intents, 70 techniques, 63 evasions. Search across all four axes — intent, technique, evasion, input channel.</p>
+      <input type="text" id="techSearch" placeholder="Search: e.g. indirect, encoding, memory…" aria-label="Search techniques">
+      <div id="techList"></div>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="panel-decide" aria-labelledby="tab-decide" hidden>
+    <div class="card">
+      <h2>Decision Studio</h2>
+      <p class="small">Eight field situations. Each one: what to read, what moves to try, what defense to recommend.</p>
+      <div id="situationList"></div>
+    </div>
+    <div class="card">
+      <h2>Executive View</h2>
+      <p class="small">Risk: if an LLM can call a delete/admin tool, anyone who can talk to it can delete data. Fix priority: remove dangerous tools first, then backend auth, then human approval.</p>
+      <p class="small"><b>Quick fix picks:</b></p>
+      <div class="fixrow">
+        <button data-fix="auth">Backend Auth</button>
+        <button data-fix="least">Least Privilege</button>
+        <button data-fix="approval">Human Approval</button>
+        <button data-fix="sanitize">Sanitize Output</button>
+      </div>
+      <p id="fixOut" class="small"></p>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="panel-journal" aria-labelledby="tab-journal" hidden>
+    <div class="card">
+      <h2>Prompt Journal</h2>
+      <p class="small">Log prompts you tried, classified on the four Arcanum axes: intent, technique, evasion, input channel.</p>
+      <form id="journalForm">
+        <label>Title <input type="text" name="title" required maxlength="200" placeholder="Short name for this attempt"></label>
+        <label>Prompt <textarea name="prompt" maxlength="4000" rows="3" placeholder="What you asked the agent"></textarea></label>
+        <label>Result <textarea name="result" maxlength="4000" rows="3" placeholder="What happened"></textarea></label>
+        <div class="grid2">
+          <label>Intent <input type="text" name="intent" maxlength="120" placeholder="e.g. Exfiltration"></label>
+          <label>Technique <input type="text" name="technique" maxlength="120" placeholder="e.g. Indirect Injection"></label>
+          <label>Evasion <input type="text" name="evasion" maxlength="120" placeholder="e.g. Encoding"></label>
+          <label>Input channel <input type="text" name="input_channel" maxlength="120" placeholder="e.g. Product review"></label>
+        </div>
+        <label>Context <input type="text" name="context_key" maxlength="64" placeholder="Lab or app, e.g. lab-3"></label>
+        <button type="submit">Add journal entry</button>
+      </form>
+      <div id="journalList"></div>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="panel-report" aria-labelledby="tab-report" hidden>
+    <div class="card">
+      <h2>Report Builder</h2>
+      <p class="small">Build a red-team report on a lab app. Scope is prefilled to authorized labs only — edit it only to narrow it further.</p>
+      <form id="reportForm">
+        <input type="hidden" name="id" value="">
+        <label>Title <input type="text" name="title" required maxlength="200" placeholder="e.g. Lab 3 — Indirect Prompt Injection"></label>
+        <label>Target name <input type="text" name="target_name" maxlength="300" placeholder="Lab app name"></label>
+        <label>Target URL <input type="text" name="target_url" maxlength="500" placeholder="https://…"></label>
+        <label>Target description <textarea name="target_desc" maxlength="2000" rows="2" placeholder="What the target does, who uses it, what data/tools it has"></textarea></label>
+        <label>Scope <textarea name="scope" maxlength="2000" rows="3"></textarea></label>
+        <label>Recon <textarea name="recon" maxlength="4000" rows="3" placeholder="Inputs (direct + indirect), tools/APIs, permissions, output handling, memory/RAG"></textarea></label>
+        <label>Findings <textarea name="findings" maxlength="6000" rows="4" placeholder="OWASP LLM ID, impact, evidence, repro steps"></textarea></label>
+        <label>Fixes / Defenses <textarea name="fixes" maxlength="6000" rows="4" placeholder="Backend auth, least privilege, human approval, output sanitization, data minimization, logging"></textarea></label>
+        <label>Tests (one per line) <textarea name="tests" rows="3" placeholder="Test 1 Direct Injection — result…"></textarea></label>
+        <label>Status
+          <select name="status">
+            <option value="draft">Draft</option>
+            <option value="complete">Complete</option>
+          </select>
+        </label>
+        <button type="submit">Save report</button>
+        <button type="button" id="reportClear">New report</button>
+      </form>
+      <div id="reportList"></div>
+    </div>
+    <div class="card">
+      <h2>Backup</h2>
+      <p class="small">Download your whole studio state (progress, journal, reports) as JSON. Restore by replacing <code>data/data.json</code> on the server and restarting it.</p>
+      <a class="btnlink" href="/api/export" download>Download JSON backup</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p class="small">AI Hacker Studio — standalone build. Authorized labs only: PortSwigger Academy + Lakera Gandalf. © 2026 Paris Pehlivanovic. All rights reserved.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
