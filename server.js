@@ -22,16 +22,12 @@ const DATA_FILE = path.join(ROOT, 'data', 'data.json');
 const SEED_FILE = path.join(ROOT, 'data', 'seed.json');
 const PUBLIC_DIR = path.join(ROOT, 'public');
 
-function loadSeed() {
-  return JSON.parse(fs.readFileSync(SEED_FILE, 'utf8'));
-}
+// Store: file-backed locally (data/data.json, created from seed on first
+// run — identical to the original behaviour), Vercel KV-backed when
+// KV_REST_API_URL + KV_REST_API_TOKEN are set. See lib/store.js.
+const { createStore } = require('./lib/store');
 
-function loadData() {
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-    fs.writeFileSync(DATA_FILE, JSON.stringify(loadSeed(), null, 2) + '\n', 'utf8');
-  }
-  const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+function normalizeData(data) {
   if (!Array.isArray(data.progress)) data.progress = [];
   if (!Array.isArray(data.journal)) data.journal = [];
   if (!Array.isArray(data.reports)) data.reports = [];
@@ -40,14 +36,28 @@ function loadData() {
   return data;
 }
 
-// Write via a temp file + rename so a crash cannot leave a half-written file.
-function saveData(data) {
-  const tmp = DATA_FILE + '.tmp-' + process.pid;
-  fs.writeFileSync(tmp, JSON.stringify(data, null, 2) + '\n', 'utf8');
-  fs.renameSync(tmp, DATA_FILE);
+const store = createStore({
+  key: 'studio:state',
+  seedPath: SEED_FILE,
+  dataPath: DATA_FILE,
+  normalize: normalizeData,
+});
+
+// In-memory state. File mode: loaded once, like the original server.
+// KV mode: reloaded fresh from KV on every request (a serverless
+// invocation must never trust a warm in-memory copy).
+let db = null;
+
+async function ensureDb() {
+  if (db === null || store.useKv) db = await store.load();
+  return db;
 }
 
-let db = loadData();
+// Same save semantics as before: every mutation commits. File mode writes
+// via tmp file + rename; KV mode writes the whole state to the KV key.
+async function saveData(data) {
+  await store.save(data);
+}
 
 // ---------------------------------------------------------------------------
 // Validation (server-side; mirrors the hosted app's action schemas)
@@ -223,7 +233,7 @@ async function handleApi(req, res, url) {
       entry.notes = notes;
       entry.updated_at = now;
     }
-    saveData(db);
+    await saveData(db);
     return sendJson(res, 200, { ok: true, entry });
   }
 
@@ -243,7 +253,7 @@ async function handleApi(req, res, url) {
     }
     db.nextJournalId += 1;
     db.journal.push(entry);
-    saveData(db);
+    await saveData(db);
     return sendJson(res, 200, { ok: true, id: entry.id, entry });
   }
 
@@ -253,7 +263,7 @@ async function handleApi(req, res, url) {
     const idx = db.journal.findIndex((j) => j.id === body.id);
     if (idx === -1) return sendJson(res, 404, { ok: false, error: 'journal entry not found' });
     db.journal.splice(idx, 1);
-    saveData(db);
+    await saveData(db);
     return sendJson(res, 200, { ok: true, deleted: body.id });
   }
 
@@ -295,13 +305,13 @@ async function handleApi(req, res, url) {
       const r = db.reports.find((x) => x.id === body.id);
       if (!r) return sendJson(res, 404, { ok: false, error: 'report not found' });
       Object.assign(r, values, { title, tests, status, updated_at: now });
-      saveData(db);
+      await saveData(db);
       return sendJson(res, 200, { ok: true, id: r.id, report: r });
     }
     const report = { id: db.nextReportId, title, ...values, tests, status, created_at: now, updated_at: now };
     db.nextReportId += 1;
     db.reports.push(report);
-    saveData(db);
+    await saveData(db);
     return sendJson(res, 200, { ok: true, id: report.id, report });
   }
 
@@ -311,7 +321,7 @@ async function handleApi(req, res, url) {
     const idx = db.reports.findIndex((r) => r.id === body.id);
     if (idx === -1) return sendJson(res, 404, { ok: false, error: 'report not found' });
     db.reports.splice(idx, 1);
-    saveData(db);
+    await saveData(db);
     return sendJson(res, 200, { ok: true, deleted: body.id });
   }
 
@@ -321,18 +331,28 @@ async function handleApi(req, res, url) {
 // ---------------------------------------------------------------------------
 // Server
 // ---------------------------------------------------------------------------
-const server = http.createServer((req, res) => {
+// The request handler is exported so Vercel can run it serverless
+// (api/index.js). `node server.js` still starts the standalone server.
+async function handler(req, res) {
+  await ensureDb();
   const url = new URL(req.url, 'http://localhost');
   if (url.pathname === '/api/state' || url.pathname.startsWith('/api/')) {
-    handleApi(req, res, url).catch((e) => {
-      sendJson(res, 500, { ok: false, error: 'internal error: ' + e.message });
-    });
+    await handleApi(req, res, url);
     return;
   }
   serveStatic(req, res, url.pathname);
-});
+}
 
-const PORT = Number(process.env.PORT) || 3000;
-server.listen(PORT, () => {
-  console.log('AI Hacker Studio listening on http://localhost:' + PORT);
-});
+module.exports = handler;
+
+if (require.main === module) {
+  const server = http.createServer((req, res) => {
+    handler(req, res).catch((e) => {
+      if (!res.headersSent) sendJson(res, 500, { ok: false, error: 'internal error: ' + e.message });
+    });
+  });
+  const PORT = Number(process.env.PORT) || 3000;
+  server.listen(PORT, () => {
+    console.log('AI Hacker Studio listening on http://localhost:' + PORT);
+  });
+}
